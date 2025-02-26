@@ -1,0 +1,157 @@
+Rules:
+- RuleName: Supress controls for stackset resources.
+  Description: These resources are deployed through the organization to ensure accounts
+    are properly configured. They may not conform to all controls for various reasons.
+  IsTerminal: false
+  RuleOrder: 1
+  RuleStatus: ENABLED
+  Actions:
+  - FindingFieldsUpdate:
+      Note:
+        Text: Organization StackSet resource.
+        UpdatedBy: sechub-automation
+      VerificationState: BENIGN_POSITIVE
+      Workflow:
+        Status: SUPPRESSED
+    Type: FINDING_FIELDS_UPDATE
+  Criteria:
+    ComplianceSecurityControlId:
+    - Comparison: EQUALS
+      Value: Lambda.3
+    ComplianceStatus:
+    - Comparison: EQUALS
+      Value: FAILED
+    ProductName:
+    - Comparison: EQUALS
+      Value: Security Hub
+    RecordState:
+    - Comparison: EQUALS
+      Value: ACTIVE
+    ResourceTags:
+    - Comparison: CONTAINS
+      Key: aws:cloudformation:stack-name
+      Value: StackSet-IAMPasswordPolicy-
+    WorkflowStatus:
+    - Comparison: EQUALS
+      Value: NEW
+
+- RuleName: Supress controls for Control Tower resources.
+  Description: Control tower resources are managed by Amazon.
+  IsTerminal: false
+  RuleOrder: 2
+  RuleStatus: ENABLED
+  Actions:
+  - FindingFieldsUpdate:
+      Note:
+        Text: Control Tower resource.
+        UpdatedBy: sechub-automation
+      VerificationState: BENIGN_POSITIVE
+      Workflow:
+        Status: SUPPRESSED
+    Type: FINDING_FIELDS_UPDATE
+  Criteria:
+    ComplianceSecurityControlId:
+    - Comparison: EQUALS
+      Value: SNS.1
+    - Comparison: EQUALS
+      Value: Lambda.3
+    ComplianceStatus:
+    - Comparison: EQUALS
+      Value: FAILED
+    ProductName:
+    - Comparison: EQUALS
+      Value: Security Hub
+    RecordState:
+    - Comparison: EQUALS
+      Value: ACTIVE
+    ResourceTags:
+    - Comparison: CONTAINS
+      Key: aws:cloudformation:stack-name
+      Value: StackSet-AWSControlTowerBP-BASELINE-CLOUDWATCH-
+    WorkflowStatus:
+    - Comparison: EQUALS
+      Value: NEW
+
+- RuleName: Suppress S3 findings for infrastructure state resources.
+  Description: These resources are reproducible and do not require replication or
+    long term backups.
+  IsTerminal: false
+  RuleOrder: 3
+  RuleStatus: ENABLED
+  Actions:
+    - FindingFieldsUpdate:
+        Note:
+          Text: Infrastructure state resources are reproducible and do not require replication
+            or long term backups.
+          UpdatedBy: sechub-automation
+        VerificationState: BENIGN_POSITIVE
+        Workflow:
+          Status: SUPPRESSED
+      Type: FINDING_FIELDS_UPDATE
+  Criteria:
+    ComplianceSecurityControlId:
+      - Comparison: EQUALS
+        Value: DynamoDB.1
+      - Comparison: EQUALS
+        Value: DynamoDB.4
+      - Comparison: EQUALS
+        Value: S3.7
+      - Comparison: EQUALS
+        Value: S3.15
+    ComplianceStatus:
+      - Comparison: EQUALS
+        Value: FAILED
+    ProductName:
+      - Comparison: EQUALS
+        Value: Security Hub
+    RecordState:
+      - Comparison: EQUALS
+        Value: ACTIVE
+    ResourceTags:
+      - Comparison: EQUALS
+        Key: use
+        Value: infrastructure-state
+    WorkflowStatus:
+      - Comparison: EQUALS
+        Value: NEW
+
+- RuleName: Suppress S3 findings for logging buckets.
+  Description: Logging buckets have certain limitations in their configuration that
+    we need to account for.
+  IsTerminal: false
+  RuleOrder: 4
+  RuleStatus: ENABLED
+  Actions:
+    - FindingFieldsUpdate:
+        Note:
+          Text: Logging buckets can't log their own access logs or use customer managed
+            keys for encryption.
+          UpdatedBy: sechub-automation
+        VerificationState: BENIGN_POSITIVE
+        Workflow:
+          Status: SUPPRESSED
+      Type: FINDING_FIELDS_UPDATE
+  Criteria:
+    ComplianceSecurityControlId:
+      - Comparison: EQUALS
+        Value: S3.9
+      - Comparison: EQUALS
+        Value: S3.17
+      - Comparison: EQUALS
+        Value: S3.7
+    ComplianceStatus:
+      - Comparison: EQUALS
+        Value: FAILED
+    ProductName:
+      - Comparison: EQUALS
+        Value: Security Hub
+    RecordState:
+      - Comparison: EQUALS
+        Value: ACTIVE
+    ResourceTags:
+      - Comparison: EQUALS
+        Key: use
+        Value: logging
+    WorkflowStatus:
+      - Comparison: EQUALS
+        Value: NEW
