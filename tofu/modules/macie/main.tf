@@ -20,7 +20,3 @@ resource "terraform_data" "template" {
     command = "aws macie2 update-sensitivity-inspection-template --id ${data.external.template_id.result.id} --region ${data.aws_region.current.name} --cli-input-yaml file://${path.module}/template.yaml"
   }
 }
-
-output "template_id" {
-  value = data.external.template_id.result.id
-}

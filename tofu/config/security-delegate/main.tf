@@ -34,7 +34,3 @@ module "macie" {
     aws = aws.by_region[each.key]
   }
 }
-
-output "tfstate_bucket" {
-  value = module.backend.bucket
-}
