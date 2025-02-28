@@ -25,6 +25,12 @@ module "automations" {
   }
 }
 
-output "tfstate_bucket" {
-  value = module.backend.bucket
+# Configure Macie in each region.
+module "macie" {
+  for_each = toset(["us-east-1", "us-east-2", "us-west-1", "us-west-2"])
+  source   = "../../modules/macie"
+
+  providers = {
+    aws = aws.by_region[each.key]
+  }
 }
