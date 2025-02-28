@@ -77,7 +77,7 @@ jobs:
           for module in ${modules[@]}
           do
             echo "Linting module $module"
-            tflint --format compact --chdir $module
+            tflint --format compact --chdir $module --config "$GITHUB_WORKSPACE/.tflint.hcl"
             exit_code=$(( $? > exit_code ? $? : exit_code ))
           done
 
