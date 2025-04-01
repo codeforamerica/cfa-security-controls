@@ -155,3 +155,52 @@ Rules:
     WorkflowStatus:
       - Comparison: EQUALS
         Value: NEW
+
+- RuleName: Allow CloudFront distributions without a default root object.
+  Description: Our applications don't allow listing, so we don't need a default
+               root object.
+  IsTerminal: false
+  RuleOrder: 5
+  RuleStatus: ENABLED
+  Actions:
+    - FindingFieldsUpdate:
+        Note:
+          Text: Application doesn't support or require default root object.
+          UpdatedBy: sechub-automation
+        VerificationState: BENIGN_POSITIVE
+        Workflow:
+          Status: SUPPRESSED
+      Type: FINDING_FIELDS_UPDATE
+  Criteria:
+    ComplianceSecurityControlId:
+        - Comparison: EQUALS
+          Value: CloudFront.1
+    ComplianceStatus:
+      - Comparison: EQUALS
+        Value: FAILED
+    ProductName:
+      - Comparison: EQUALS
+        Value: Security Hub
+    RecordState:
+      - Comparison: EQUALS
+        Value: ACTIVE
+    WorkflowStatus:
+      - Comparison: EQUALS
+        Value: NEW
+    ResourceTags:
+      - Comparison: EQUALS
+        Key: project
+        Value: getcalfresh
+      # Tax benefits applications.
+      - Comparison: EQUALS
+        Key: project
+        Value: ctc
+      - Comparison: EQUALS
+        Key: project
+        Value: fyst
+      - Comparison: EQUALS
+        Key: project
+        Value: gyr
+      - Comparison: EQUALS
+        Key: project
+        Value: gyr-es
