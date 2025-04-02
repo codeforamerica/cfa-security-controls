@@ -62,7 +62,7 @@ jobs:
       - name: Plan changes
         id: plan
         working-directory: ./tofu/config/${{ inputs.config }}
-        run: tofu plan -no-color
+        run: tofu plan -no-color -concise
       - name: Display plan
         uses: imesense/gha-echo-action@v0.2
         with:
