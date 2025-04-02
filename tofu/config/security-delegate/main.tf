@@ -8,7 +8,7 @@ terraform {
 }
 
 module "backend" {
-  source = "github.com/codeforamerica/tofu-modules-aws-backend?ref=ssl-policy"
+  source = "github.com/codeforamerica/tofu-modules-aws-backend?ref=1.1.1"
 
   bucket_suffix = true
   project       = "security"
