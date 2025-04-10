@@ -188,6 +188,9 @@ Rules:
       - Comparison: EQUALS
         Value: NEW
     ResourceTags:
+      # We explicitly define the project tags for applications that are exempt
+      # from this control. This ensures we get notified if a new application is
+      # deployed and can determine if it should be exempt.
       - Comparison: EQUALS
         Key: project
         Value: getcalfresh
@@ -204,3 +207,62 @@ Rules:
       - Comparison: EQUALS
         Key: project
         Value: gyr-es
+
+- RuleName: Exceptions for non-production environments.
+  Description: Certain controls are not applicable to non-production
+               environments, particularly controls around high availability and
+               backups.
+  IsTerminal: false
+  RuleOrder: 6
+  RuleStatus: ENABLED
+  Actions:
+    - FindingFieldsUpdate:
+        Note:
+          Text: Non-production application is exempt from this control.
+          UpdatedBy: sechub-automation
+        VerificationState: BENIGN_POSITIVE
+        Workflow:
+          Status: SUPPRESSED
+      Type: FINDING_FIELDS_UPDATE
+  Criteria:
+    ComplianceSecurityControlId:
+      # EBS volumes in non-prod environments don't need to be backed up.
+      - Comparison: EQUALS
+        Value: EC2.28
+      # Non-prod databases don't need a strict backup policy.
+      - Comparison: EQUALS
+        Value: RDS.11
+      # Non-prod databases don't need to be deployed in multiple availability
+      # zones.
+      - Comparison: EQUALS
+        Value: RDS.15
+    ComplianceStatus:
+      - Comparison: EQUALS
+        Value: FAILED
+    ProductName:
+      - Comparison: EQUALS
+        Value: Security Hub
+    RecordState:
+      - Comparison: EQUALS
+        Value: ACTIVE
+    WorkflowStatus:
+      - Comparison: EQUALS
+        Value: NEW
+    ResourceTags:
+      # We explicitly define the environment tags for environments that are
+      # exempt.
+      - Comparison: EQUALS
+        Key: environment
+        Value: demo
+      - Comparison: EQUALS
+        Key: environment
+        Value: development
+      - Comparison: EQUALS
+        Key: environment
+        Value: staging
+      - Comparison: EQUALS
+        Key: environment
+        Value: qa
+      - Comparison: EQUALS
+        Key: environment
+        Value: test
