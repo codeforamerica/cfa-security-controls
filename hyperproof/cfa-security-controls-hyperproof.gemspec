@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
     'rubygems_mfa_required' => 'true',
     'source_code_uri' => 'https://github.com/codeforamerica/cfa-security-controls'
   }
+  s.executables << 'hyperproof'
 
   s.required_ruby_version = '>= 3.4'
 
@@ -30,4 +31,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'faraday', '~> 2.13'
   s.add_dependency 'faraday-multipart', '~> 1.1'
   s.add_dependency 'marcel', '~> 1.0'
+  s.add_dependency 'thor', '~> 1.3'
 end
