@@ -64,7 +64,8 @@ module CfaSecurityControls
           return false unless email && password
 
           ::Aptible::Auth::Token.create(email:, password:)
-        rescue OAuth2::Error
+        rescue OAuth2::Error => e
+          puts "Error: #{e.message}"
           false
         end
       end
