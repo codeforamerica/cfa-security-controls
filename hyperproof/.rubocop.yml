@@ -1,0 +1,20 @@
+plugins:
+  - rubocop-performance
+  - rubocop-rake
+
+AllCops:
+  NewCops: enable
+  SuggestExtensions: true
+  TargetRubyVersion: 3.4
+
+Metrics/MethodLength:
+  CountAsOne:
+    - array
+    - method_call
+    - hash
+
+# Exclude our main gem include from the file naming convention, to keep it
+# consistent with the gem name.
+Naming/FileName:
+  Exclude:
+    - 'lib/cfa-security-controls-hyperproof.rb'
