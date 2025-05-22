@@ -3,7 +3,7 @@
 require_relative 'lib/cfa_security_controls/hyperproof/version'
 
 Gem::Specification.new do |s|
-  s.name        = 'cfa-eng-cli'
+  s.name        = 'cfa-security-controls-hyperproof'
   s.version     = CfaSecurityControls::Hyperproof::VERSION
   s.licenses    = ['MIT']
   s.summary     = 'Code for America Hyperproof Security Controls'
@@ -31,5 +31,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'faraday', '~> 2.13'
   s.add_dependency 'faraday-multipart', '~> 1.1'
   s.add_dependency 'marcel', '~> 1.0'
+  s.add_dependency 'multi_json', '~> 1.15'
   s.add_dependency 'thor', '~> 1.3'
 end

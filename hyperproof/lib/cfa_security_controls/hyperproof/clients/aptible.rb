@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'aptible/api'
+require 'multi_json'
 
 module CfaSecurityControls
   module Hyperproof
@@ -61,12 +62,11 @@ module CfaSecurityControls
         def basic_auth_token
           email = ENV.fetch('APTIBLE_USERNAME', nil)
           password = ENV.fetch('APTIBLE_PASSWORD', nil)
-          puts 'Error: Username and password not found'
           return false unless email && password
 
-          ::Aptible::Auth::Token.create(email:, password:)
-        rescue OAuth2::Error => e
-          puts "Error: #{e.message}"
+          ::Aptible::Auth::Token.create(email:, password:,
+                                        headers: { 'Authorization' => nil })
+        rescue OAuth2::Error
           false
         end
       end
