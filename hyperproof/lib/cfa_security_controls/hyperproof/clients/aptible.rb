@@ -61,6 +61,7 @@ module CfaSecurityControls
         def basic_auth_token
           email = ENV.fetch('APTIBLE_USERNAME', nil)
           password = ENV.fetch('APTIBLE_PASSWORD', nil)
+          puts 'Error: Username and password not found'
           return false unless email && password
 
           ::Aptible::Auth::Token.create(email:, password:)
