@@ -3,6 +3,9 @@ name: Ruby checks
 on:
   push:
 
+permissions:
+  contents: read
+
 jobs:
   projects:
     name: Find ruby projects
