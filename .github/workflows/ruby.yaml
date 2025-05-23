@@ -14,8 +14,8 @@ jobs:
         id: projects
         uses: Rishabh510/Path-lister-action@master
         with:
-          path: "."
-          type: ".ruby-version"
+          path: .
+          type: .ruby-version
       - name: Output results
         run: |
           echo "Found ${{ steps.projects.outputs.path_count }} file(s) with this extension:"
