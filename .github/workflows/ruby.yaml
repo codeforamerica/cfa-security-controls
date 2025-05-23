@@ -1,0 +1,67 @@
+name: Ruby checks
+
+on:
+  push:
+
+jobs:
+  projects:
+    name: Find ruby projects
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout source code
+          uses: actions/checkout@v4
+        - name: Find all ruby projects
+          id: find
+          uses: Drafteame/list-folders-action@main
+          with:
+            paths: "*/.ruby-version"
+
+        - name: Output total sub-folders
+          run:
+            echo "Total sub-folders: ${{ steps.find.outputs.total }}"
+        - name: Output folders with base path
+          run:
+            echo "Folders with base path: ${{ steps.find.outputs.folders }}"
+#        - name: Show all matching projects
+#            shell: bash
+#            run: |
+#            mods=(${{ join(fromJSON(steps.find.outputs.projects), ' ') }})
+#            printf "%s\n" "${mods[@]}"
+#        - name: Show changed files
+#            run: |
+#            echo "${{ steps.diff.outputs.diff }}"
+#        - name: Get the modified projects
+#            id: modified
+#            uses: actions/github-script@v7
+#            with:
+#            script: |
+#                const projects = ${{ steps.find.outputs.projects }}
+#                const diff = ${{ steps.diff.outputs.diff }}
+#                const modifiedProjects = projects.filter(
+#                (project) => {
+#                    return !!diff.find(file => new RegExp(`^${project}/.+`).test(file))
+#                }
+#                )
+#
+#                core.setOutput('projects', modifiedProjects)
+#        - name: Show modified projects
+#            run: |
+#            echo "${{ steps.modified.outputs.projects }}"
+
+  lint:
+    name: Lint ruby code
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: [hyperproof]
+    steps:
+      - uses: actions/checkout@v4
+      - run: git fetch origin main --depth=1
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: ${{ matrix.dir }}
+      - name: RuboCop Linter
+        working-directory: ${{ matrix.dir }}
+        run: bundle exec rubocop
