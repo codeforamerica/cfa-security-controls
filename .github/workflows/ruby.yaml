@@ -30,9 +30,9 @@ jobs:
             projects=()
             paths=(${{ steps.pl.outputs.paths }})
             for i in "${paths[@]}"; do
-              projects+=(dirname "$i")
+              projects+=($(dirname "$i"))
             done
-            echo ::set-output name=projects::"${projects[@]}"
+            echo "projects=${projects[@]}" >> $GITHUB_OUTPUT
 
         - name: Show all matching projects
           shell: bash
