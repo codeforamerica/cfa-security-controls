@@ -10,18 +10,32 @@ jobs:
     steps:
         - name: Checkout source code
           uses: actions/checkout@v4
-        - name: Find all ruby projects
-          id: find
-          uses: Drafteame/list-folders-action@main
-          with:
-            paths: "*/.ruby-version"
+#        - name: Find all ruby projects
+#          id: find
+#          uses: Drafteame/list-folders-action@main
+#          with:
+#            paths: "*/.ruby-version"
+#
+#        - name: Output total sub-folders
+#          run: |
+#            echo "Total sub-folders: ${{ steps.find.outputs.total }}"
+#        - name: Output folders with base path
+#          run: |
+#            echo "Folders with base path: ${{ steps.find.outputs.folders }}"
 
-        - name: Output total sub-folders
+        - name: Fetch action
+          id: pl
+          uses: Rishabh510/Path-lister-action@master
+          with:
+            path: "."
+            type: ".ruby-version"
+
+        - name: Output results
           run: |
-            echo "Total sub-folders: ${{ steps.find.outputs.total }}"
-        - name: Output folders with base path
-          run: |
-            echo "Folders with base path: ${{ steps.find.outputs.folders }}"
+            echo "Found ${{ steps.pl.outputs.path_count }} file(s) with this extension:"
+            for i in ${{ steps.pl.outputs.paths }}; do
+            echo $i
+            done
 #        - name: Show all matching projects
 #            shell: bash
 #            run: |
