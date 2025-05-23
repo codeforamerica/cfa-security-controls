@@ -10,20 +10,7 @@ jobs:
     steps:
         - name: Checkout source code
           uses: actions/checkout@v4
-#        - name: Find all ruby projects
-#          id: find
-#          uses: Drafteame/list-folders-action@main
-#          with:
-#            paths: "*/.ruby-version"
-#
-#        - name: Output total sub-folders
-#          run: |
-#            echo "Total sub-folders: ${{ steps.find.outputs.total }}"
-#        - name: Output folders with base path
-#          run: |
-#            echo "Folders with base path: ${{ steps.find.outputs.folders }}"
-
-        - name: Fetch action
+        - name: Find all ruby projects
           id: pl
           uses: Rishabh510/Path-lister-action@master
           with:
@@ -36,6 +23,22 @@ jobs:
             for i in ${{ steps.pl.outputs.paths }}; do
             echo $i
             done
+
+        - name: Get the project paths
+          id: paths
+          run: |
+            projects=()
+            paths=(${{ steps.pl.outputs.paths }})
+            for i in "${paths[@]}"; do
+              projects+=(dirname "$i")
+            done
+            echo ::set-output name=projects::"${projects[@]}"
+
+        - name: Show all matching projects
+          shell: bash
+          run: |
+            for i in ${{ steps.paths.outputs.projects }}; do
+            echo $i
 #        - name: Show all matching projects
 #            shell: bash
 #            run: |
