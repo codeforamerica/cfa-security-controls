@@ -30,9 +30,9 @@ jobs:
           for i in "${paths[@]}"; do
             projects+=($(dirname "$i"))
           done
-          output=$(echo "${projects}" | jq --raw-input 'split(" ")')
+          output=$(echo "${projects[@]}" | jq --raw-input 'split(" ")')
           echo "OUTPUT: $output"
-          echo "projects=$output" >> $GITHUB_OUTPUT
+          echo "projects=${output}" >> $GITHUB_OUTPUT
       - name: Show all matching projects
         shell: bash
         run: |
