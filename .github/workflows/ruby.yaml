@@ -8,69 +8,43 @@ jobs:
     name: Find ruby projects
     runs-on: ubuntu-latest
     steps:
-        - name: Checkout source code
-          uses: actions/checkout@v4
-        - name: Find all ruby projects
-          id: pl
-          uses: Rishabh510/Path-lister-action@master
-          with:
-            path: "."
-            type: ".ruby-version"
-
-        - name: Output results
-          run: |
-            echo "Found ${{ steps.pl.outputs.path_count }} file(s) with this extension:"
-            for i in ${{ steps.pl.outputs.paths }}; do
-            echo $i
-            done
-
-        - name: Get the project paths
-          id: paths
-          run: |
-            projects=()
-            paths=(${{ steps.pl.outputs.paths }})
-            for i in "${paths[@]}"; do
-              projects+=($(dirname "$i"))
-            done
-            echo "projects=${projects[@]}" >> $GITHUB_OUTPUT
-
-        - name: Show all matching projects
-          shell: bash
-          run: |
-            for i in (${{ steps.paths.outputs.projects }}); do
-            echo $i
-#        - name: Show all matching projects
-#            shell: bash
-#            run: |
-#            mods=(${{ join(fromJSON(steps.find.outputs.projects), ' ') }})
-#            printf "%s\n" "${mods[@]}"
-#        - name: Show changed files
-#            run: |
-#            echo "${{ steps.diff.outputs.diff }}"
-#        - name: Get the modified projects
-#            id: modified
-#            uses: actions/github-script@v7
-#            with:
-#            script: |
-#                const projects = ${{ steps.find.outputs.projects }}
-#                const diff = ${{ steps.diff.outputs.diff }}
-#                const modifiedProjects = projects.filter(
-#                (project) => {
-#                    return !!diff.find(file => new RegExp(`^${project}/.+`).test(file))
-#                }
-#                )
-#
-#                core.setOutput('projects', modifiedProjects)
-#        - name: Show modified projects
-#            run: |
-#            echo "${{ steps.modified.outputs.projects }}"
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Find all ruby projects
+        id: projects
+        uses: Rishabh510/Path-lister-action@master
+        with:
+          path: "."
+          type: ".ruby-version"
+      - name: Output results
+        run: |
+          echo "Found ${{ steps.projects.outputs.path_count }} file(s) with this extension:"
+          for i in ${{ steps.projects.outputs.paths }}; do
+          echo $i
+          done
+      - name: Get the project paths
+        id: paths
+        run: |
+          projects=()
+          paths=(${{ steps.projects.outputs.paths }})
+          for i in "${paths[@]}"; do
+            projects+=($(dirname "$i"))
+          done
+          echo "projects=${projects[@]}" >> $GITHUB_OUTPUT
+      - name: Show all matching projects
+        shell: bash
+        run: |
+          echo "${{ steps.paths.outputs.projects }})"
+    outputs:
+      projects: ${{ steps.paths.outputs.projects }}
 
   lint:
     name: Lint ruby code
+    needs: projects
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dir: [hyperproof]
+        dir: ${{ needs.projects.outputs.projects }}
     steps:
       - uses: actions/checkout@v4
       - run: git fetch origin main --depth=1
