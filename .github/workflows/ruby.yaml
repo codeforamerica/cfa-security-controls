@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dir: ${{ needs.projects.outputs.projects }}
+        dir: ${{ fromJSON(needs.projects.outputs.projects) }}
     steps:
       - uses: actions/checkout@v4
       - run: git fetch origin main --depth=1
