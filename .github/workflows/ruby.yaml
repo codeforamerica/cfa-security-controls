@@ -37,7 +37,7 @@ jobs:
         - name: Show all matching projects
           shell: bash
           run: |
-            for i in ${{ steps.paths.outputs.projects }}; do
+            for i in (${{ steps.paths.outputs.projects }}); do
             echo $i
 #        - name: Show all matching projects
 #            shell: bash
