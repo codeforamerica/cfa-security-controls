@@ -30,7 +30,9 @@ jobs:
           for i in "${paths[@]}"; do
             projects+=($(dirname "$i"))
           done
-          echo "projects=${projects[@]}" >> $GITHUB_OUTPUT
+          printf -v joined '%s,' "${data[@]}"
+          echo "${joined%,}"
+          echo "projects=${joined}" >> $GITHUB_OUTPUT
       - name: Show all matching projects
         shell: bash
         run: |
