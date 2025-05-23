@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../Gemfile', __dir__)
+require 'bundler/setup'
+
+require 'cfa-security-controls-hyperproof'
+require 'thor'
+
+module CfaSecurityControls
+  module Hyperproof
+    # CLI tool for the CFA Security Controls Hyperproof integration.
+    class CLI < Thor
+      desc 'collect', 'Collect and sync all proofs to Hyperproof'
+      def collect
+        say 'Collecting proofs...', :green
+        CfaSecurityControls::Hyperproof.run
+        say 'All proofs collected and synced to Hyperproof.', :green
+      end
+
+      desc 'version', 'Show the current version'
+      def version
+        say CfaSecurityControls::Hyperproof::VERSION
+      end
+    end
+  end
+end
+
+CfaSecurityControls::Hyperproof::CLI.start(ARGV)
