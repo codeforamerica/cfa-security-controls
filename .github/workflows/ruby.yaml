@@ -31,12 +31,12 @@ jobs:
             projects+=($(dirname "$i"))
           done
           printf -v joined '%s,' "${projects[@]}"
-          echo "${joined%,}"
-          echo "projects=${joined}" >> $GITHUB_OUTPUT
+          echo $projects | jq --raw-input 'split(" ")'
+          echo "projects=${joined%,}" >> $GITHUB_OUTPUT
       - name: Show all matching projects
         shell: bash
         run: |
-          echo "${{ steps.paths.outputs.projects }})"
+          echo "${{ steps.paths.outputs.projects }}"
     outputs:
       projects: ${{ steps.paths.outputs.projects }}
 
