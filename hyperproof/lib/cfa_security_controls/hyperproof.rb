@@ -25,8 +25,7 @@ module CfaSecurityControls
 
           label = Entities::Label.new(proof.label)
           label.create unless label.exists?
-          entity = Entities::Proof.new(File.basename(filename), label:)
-          entity.create(filename)
+          Entities::Proof.new(File.basename(filename), label:).create(filename)
         end
       end
     end
