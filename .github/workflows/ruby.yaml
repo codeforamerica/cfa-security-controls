@@ -17,10 +17,10 @@ jobs:
             paths: "*/.ruby-version"
 
         - name: Output total sub-folders
-          run:
+          run: |
             echo "Total sub-folders: ${{ steps.find.outputs.total }}"
         - name: Output folders with base path
-          run:
+          run: |
             echo "Folders with base path: ${{ steps.find.outputs.folders }}"
 #        - name: Show all matching projects
 #            shell: bash
