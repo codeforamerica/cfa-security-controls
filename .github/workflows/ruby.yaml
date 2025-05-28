@@ -63,6 +63,8 @@ jobs:
         run: bundle exec rubocop
 
   spec:
+    name: Run ruby tests
+    needs: projects
     runs-on: ubuntu-latest
     strategy:
       matrix:
