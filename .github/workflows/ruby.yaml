@@ -1,0 +1,84 @@
+name: Ruby checks
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  projects:
+    name: Find ruby projects
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      - name: Find all ruby projects
+        id: projects
+        uses: Rishabh510/Path-lister-action@master
+        with:
+          path: .
+          type: .ruby-version
+      - name: Output results
+        run: |
+          echo "Found ${{ steps.projects.outputs.path_count }} file(s) with this extension:"
+          for i in ${{ steps.projects.outputs.paths }}; do
+          echo $i
+          done
+      - name: Get the project paths
+        id: paths
+        run: |
+          projects=()
+          paths=(${{ steps.projects.outputs.paths }})
+          for i in "${paths[@]}"; do
+            projects+=($(dirname "$i"))
+          done
+          output=$(echo "${projects[@]}" | jq --raw-input -c 'split(" ")')
+          echo "OUTPUT: $output"
+          echo "projects=${output}" >> $GITHUB_OUTPUT
+      - name: Show all matching projects
+        shell: bash
+        run: |
+          echo "${{ steps.paths.outputs.projects }}"
+    outputs:
+      projects: ${{ steps.paths.outputs.projects }}
+
+  lint:
+    name: Lint ruby code
+    needs: projects
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: ${{ fromJSON(needs.projects.outputs.projects) }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: git fetch origin main --depth=1
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: ${{ matrix.dir }}
+      - name: RuboCop Linter
+        working-directory: ${{ matrix.dir }}
+        run: bundle exec rubocop
+
+  spec:
+    name: Run ruby tests
+    needs: projects
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: ${{ fromJSON(needs.projects.outputs.projects) }}
+    env:
+      COVERAGE: 1
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: ${{ matrix.dir }}
+      - name: Run tests
+        working-directory: ${{ matrix.dir }}
+        run: bundle exec rspec

@@ -1,0 +1,39 @@
+name: Hyperproof Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy to.
+        default: production
+        required: true
+        type: environment
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: ./hyperproof
+      - name: Collect and sync proof
+        working-directory: ./hyperproof
+        env:
+          APTIBLE_USERNAME: ${{ secrets.APTIBLE_USERNAME }}
+          APTIBLE_PASSWORD: ${{ secrets.APTIBLE_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+          HYPERPROOF_CLIENT_ID: ${{ secrets.HYPERPROOF_CLIENT_ID }}
+          HYPERPROOF_CLIENT_SECRET: ${{ secrets.HYPERPROOF_CLIENT_SECRET }}
+        run:
+          bin/hyperproof collect
