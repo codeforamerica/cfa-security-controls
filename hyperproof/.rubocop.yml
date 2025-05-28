@@ -1,7 +1,12 @@
+require:
+  - rubocop-yard
+
 plugins:
+  - rubocop-md
   - rubocop-performance
   - rubocop-rake
   - rubocop-rspec
+  - rubocop-thread_safety
 
 AllCops:
   NewCops: enable
@@ -18,7 +23,8 @@ Metrics/MethodLength:
 # consistent with the gem name.
 Naming/FileName:
   Exclude:
-    - 'lib/cfa-security-controls-hyperproof.rb'
+    - lib/cfa-security-controls-hyperproof.rb
+    - README.md
 
 RSpec/ExampleLength:
   CountAsOne:
