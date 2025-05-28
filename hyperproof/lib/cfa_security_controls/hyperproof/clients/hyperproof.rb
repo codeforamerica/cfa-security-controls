@@ -9,6 +9,8 @@ module CfaSecurityControls
     module Clients
       # Client for Hyperproof.
       class Hyperproof
+        class Unauthorized < ArgumentError; end
+
         MULTI_PART_HEADERS = {
           'Content-Type' => 'multipart/form-data'
         }.freeze
@@ -115,6 +117,10 @@ module CfaSecurityControls
         #
         # @return [String] The authentication token.
         def auth_token
+          unless ENV.key?('HYPERPROOF_CLIENT_ID') && ENV.key?('HYPERPROOF_CLIENT_SECRET')
+            raise Unauthorized, 'Missing Hyperproof credentials'
+          end
+
           response = Faraday.post(
             'https://accounts.hyperproof.app/oauth/token',
             {
@@ -127,7 +133,7 @@ module CfaSecurityControls
             }
           )
 
-          raise "Error: #{response.status} - #{response.body}" unless response.success?
+          raise Unauthorized, "Error: #{response.status} - #{response.body}" unless response.success?
 
           JSON.parse(response.body, symbolize_names: true)[:access_token]
         end

@@ -38,6 +38,8 @@ module CfaSecurityControls
           @token ||= basic_auth_token || sso_token
 
           raise InvalidCredentials, 'No valid Aptible credentials found' unless @token
+
+          @token
         end
 
         # Retrieve the SSO token from the Aptible token file.

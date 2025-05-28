@@ -54,11 +54,11 @@ module CfaSecurityControls
 
           # Mapping of AWS Config field names to the desired output field names.
           #
-          # @return [Hash<String, String>] The mapping of field names.
+          # @return [Hash<String, Symbol>] The mapping of field names.
           def field_map
             {
-              'configuration.storageEncrypted' => 'storageEncrypted',
-              'configuration.kmsKeyId' => 'kmsKeyId'
+              'configuration.storageEncrypted' => :storageEncrypted,
+              'configuration.kmsKeyId' => :kmsKeyId
             }
           end
 

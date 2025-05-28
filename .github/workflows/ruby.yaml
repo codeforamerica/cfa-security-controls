@@ -61,3 +61,19 @@ jobs:
       - name: RuboCop Linter
         working-directory: ${{ matrix.dir }}
         run: bundle exec rubocop
+
+  spec:
+    runs-on: ubuntu-latest
+    env:
+      COVERAGE: 1
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          working-directory: ${{ matrix.dir }}
+      - name: Run tests
+        working-directory: ${{ matrix.dir }}
+        run: bundle exec rspec

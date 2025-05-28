@@ -34,30 +34,6 @@ module CfaSecurityControls
               }
             end
           end
-
-          private
-
-          def fields
-            %w[accountId resourceId awsRegion availabilityZone resourceName arn
-               tags configuration.storageEncrypted configuration.kmsKeyId]
-          end
-
-          def field_map
-            {
-              'configuration.storageEncrypted' => 'storageEncrypted',
-              'configuration.kmsKeyId' => 'kmsKeyId'
-            }
-          end
-
-          def format(response)
-            response.results.map do |result|
-              data = JSON.parse(result, symbolize_names: true)
-              data.delete(:configuration).each do |k, v|
-                data["configuration.#{k}"] = v
-              end
-              data.transform_keys! { |k| field_map[k] || k }
-            end
-          end
         end
       end
     end

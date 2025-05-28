@@ -79,7 +79,7 @@ module CfaSecurityControls
           params = @label.nil? ? {} : { objectType: :label, objectId: @label.id }
           results = client.proofs(params) { |p| break p if p[:filename] == @name }
 
-          raise NotFound, "Proof '#{@name}' not found" if results.empty?
+          raise NotFound, "Proof '#{@name}' not found" if results.nil? || results.empty?
 
           @proof = results
         end
