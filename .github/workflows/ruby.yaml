@@ -64,6 +64,9 @@ jobs:
 
   spec:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: ${{ fromJSON(needs.projects.outputs.projects) }}
     env:
       COVERAGE: 1
 
