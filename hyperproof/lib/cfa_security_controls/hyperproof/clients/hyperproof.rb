@@ -98,6 +98,13 @@ module CfaSecurityControls
 
         private
 
+        # Configuration for the system.
+        #
+        # @return [Config]
+        def config
+          @config ||= CfaSecurityControls::Hyperproof.config
+        end
+
         # Establish a connection to the Hyperproof API.
         #
         # @return [Faraday::Connection] The Faraday connection object.
@@ -117,15 +124,15 @@ module CfaSecurityControls
         #
         # @return [String] The authentication token.
         def auth_token
-          unless ENV.key?('HYPERPROOF_CLIENT_ID') && ENV.key?('HYPERPROOF_CLIENT_SECRET')
+          unless config.hyperproof_client_id && config.hyperproof_client_secret
             raise Unauthorized, 'Missing Hyperproof credentials'
           end
 
           response = Faraday.post(
             'https://accounts.hyperproof.app/oauth/token',
             {
-              client_id: ENV.fetch('HYPERPROOF_CLIENT_ID'),
-              client_secret: ENV.fetch('HYPERPROOF_CLIENT_SECRET'),
+              client_id: config.hyperproof_client_id,
+              client_secret: config.hyperproof_client_secret,
               grant_type: 'client_credentials'
             }.to_json,
             {

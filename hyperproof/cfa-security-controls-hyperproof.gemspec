@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'aws-sdk-configservice', '~> 1.128'
   s.add_dependency 'aws-sdk-rds', '~> 1.276'
   s.add_dependency 'aws-sdk-resourceexplorer2', '~> 1.36'
+  s.add_dependency 'configsl', '~> 1.0'
   s.add_dependency 'csv', '~> 3.3'
   s.add_dependency 'faraday', '~> 2.13'
   s.add_dependency 'faraday-multipart', '~> 1.1'

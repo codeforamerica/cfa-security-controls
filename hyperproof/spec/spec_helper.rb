@@ -16,5 +16,30 @@ end
 # Include the gem.
 require_relative '../lib/cfa-security-controls-hyperproof'
 
+RSpec.configure do |config|
+  # Keep the original $stderr and $stdout so that we can suppress output during
+  # tests.
+  original_stderr = $stderr
+  original_stdout = $stdout
+
+  config.before do
+    # Clear the configuration before each test.
+    CfaSecurityControls::Hyperproof.instance_variable_set(:@config, nil)
+
+  end
+
+  config.before(:all) do
+    # Suppress output.
+    $stderr = File.new(File::NULL, 'w')
+    $stdout = File.new(File::NULL, 'w')
+  end
+
+  config.after(:all) do
+    # Restore the original $stderr and $stdout after all tests.
+    $stderr = original_stderr
+    $stdout = original_stdout
+  end
+end
+
 # Include supporting resources.
 require_relative 'support/examples'

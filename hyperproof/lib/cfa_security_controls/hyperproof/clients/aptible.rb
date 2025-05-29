@@ -21,6 +21,13 @@ module CfaSecurityControls
 
         private
 
+        # Configuration for the system.
+        #
+        # @return [Config]
+        def config
+          @config ||= CfaSecurityControls::Hyperproof.config
+        end
+
         # Retrieve a token to authenticate with Aptible.
         #
         # This method uses a chain to find the first valid set of credentials:
@@ -62,11 +69,10 @@ module CfaSecurityControls
         # @return [Aptible::Auth::Token, Boolean] The token for the Aptible API,
         #   or false if the credentials aren't present.
         def basic_auth_token
-          email = ENV.fetch('APTIBLE_USERNAME', nil)
-          password = ENV.fetch('APTIBLE_PASSWORD', nil)
-          return false unless email && password
+          return false unless config.aptible_username && config.aptible_password
 
-          ::Aptible::Auth::Token.create(email:, password:,
+          ::Aptible::Auth::Token.create(email: config.aptible_username,
+                                        password: config.aptible_password,
                                         headers: { 'Authorization' => nil })
         rescue OAuth2::Error
           false

@@ -5,7 +5,8 @@ RSpec.describe CfaSecurityControls::Hyperproof do
   let(:proof_klass) { CfaSecurityControls::Hyperproof::Proofs::AWS::DatabaseEncryption }
 
   let(:proof) do
-    instance_double(proof_klass, label: label, write: '/tmp/test_dir/proof_file.csv')
+    instance_double(proof_klass, write: '/tmp/test_dir/proof_file.csv',
+                                 label: label, name: 'proof_file')
   end
 
   let(:entity) do
