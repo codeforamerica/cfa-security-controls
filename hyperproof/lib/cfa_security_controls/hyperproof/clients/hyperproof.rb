@@ -124,10 +124,6 @@ module CfaSecurityControls
         #
         # @return [String] The authentication token.
         def auth_token
-          unless config.hyperproof_client_id && config.hyperproof_client_secret
-            raise Unauthorized, 'Missing Hyperproof credentials'
-          end
-
           response = Faraday.post(
             'https://accounts.hyperproof.app/oauth/token',
             {

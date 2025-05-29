@@ -13,7 +13,6 @@ RSpec.describe CfaSecurityControls::Hyperproof::Clients::Aptible do
     before do
       allow(File).to receive(:exist?).with(described_class::TOKEN_FILE).and_return(true)
       allow(File).to receive(:read).with(described_class::TOKEN_FILE).and_return(sso_token_data)
-      stub_const('ENV', {})
       allow(Aptible::Api::Database).to receive(:all).and_return(databases)
     end
 
@@ -26,7 +25,10 @@ RSpec.describe CfaSecurityControls::Hyperproof::Clients::Aptible do
     context 'when no valid credentials are found' do
       before do
         allow(File).to receive(:exist?).with(described_class::TOKEN_FILE).and_return(false)
-        stub_const('ENV', {})
+        stub_const('ENV', default_config_env.merge(
+                            'APTIBLE_USERNAME' => nil,
+                            'APTIBLE_PASSWORD' => nil
+                          ))
       end
 
       it 'raises an error' do
@@ -38,10 +40,10 @@ RSpec.describe CfaSecurityControls::Hyperproof::Clients::Aptible do
       let(:token) { instance_double(Aptible::Auth::Token) }
 
       before do
-        stub_const('ENV', {
-                     'APTIBLE_USERNAME' => 'rspec',
-                     'APTIBLE_PASSWORD' => 'rspecPassw0rd!'
-                   })
+        stub_const('ENV', default_config_env.merge(
+                            'APTIBLE_USERNAME' => 'rspec',
+                            'APTIBLE_PASSWORD' => 'rspecPassw0rd!'
+                          ))
         allow(Aptible::Auth::Token).to receive(:create).and_return(token)
       end
 
@@ -54,7 +56,11 @@ RSpec.describe CfaSecurityControls::Hyperproof::Clients::Aptible do
       before do
         allow(File).to receive(:exist?).with(described_class::TOKEN_FILE).and_return(true)
         allow(File).to receive(:read).with(described_class::TOKEN_FILE).and_return(sso_token_data)
-        stub_const('ENV', {})
+
+        stub_const('ENV', default_config_env.merge(
+                            'APTIBLE_USERNAME' => nil,
+                            'APTIBLE_PASSWORD' => nil
+                          ))
       end
 
       it 'returns the sso token' do
@@ -99,10 +105,10 @@ RSpec.describe CfaSecurityControls::Hyperproof::Clients::Aptible do
     let(:username) { 'rspec' }
 
     before do
-      env = {}
-      env['APTIBLE_USERNAME'] = username if username
-      env['APTIBLE_PASSWORD'] = password if password
-      stub_const('ENV', env)
+      stub_const('ENV', default_config_env.merge(
+                          'APTIBLE_USERNAME' => username,
+                          'APTIBLE_PASSWORD' => password
+                        ))
     end
 
     context 'when no username is set' do
