@@ -13,8 +13,37 @@ if ENV.fetch('COVERAGE', false)
   end
 end
 
-# Include the gem.
+# Include the gem and test helpers.
 require_relative '../lib/cfa-security-controls-hyperproof'
+require_relative 'support/helpers'
+
+RSpec.configure do |config|
+  # Keep the original $stderr and $stdout so that we can suppress output during
+  # tests.
+  original_stderr = $stderr
+  original_stdout = $stdout
+
+  config.include Helpers::Config
+
+  config.before do
+    # Clear the configuration before each test.
+    stub_const('ENV', default_config_env)
+    clear_config
+    allow(File).to receive(:exist?).and_call_original
+  end
+
+  config.before(:all) do
+    # Suppress logger output.
+    $stderr = File.new(File::NULL, 'w')
+    $stdout = File.new(File::NULL, 'w')
+  end
+
+  config.after(:all) do
+    # Restore the original $stderr and $stdout after all tests.
+    $stderr = original_stderr
+    $stdout = original_stdout
+  end
+end
 
 # Include supporting resources.
 require_relative 'support/examples'

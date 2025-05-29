@@ -125,13 +125,6 @@ RSpec.describe CfaSecurityControls::Hyperproof::Clients::Hyperproof do
   end
 
   describe '#auth_token' do
-    before do
-      stub_const('ENV', {
-                   'HYPERPROOF_CLIENT_ID' => 'client_id',
-                   'HYPERPROOF_CLIENT_SECRET' => 'client_secret'
-                 })
-    end
-
     context 'when the credentials are invalid' do
       let(:response) do
         conn.post('/oauth/token')
@@ -175,14 +168,15 @@ RSpec.describe CfaSecurityControls::Hyperproof::Clients::Hyperproof do
 
     context 'when no credentials are provided' do
       before do
-        stub_const('ENV', {})
+        stub_const('ENV', default_config_env.merge(
+                            'HYPERPROOF_CLIENT_ID' => nil,
+                            'HYPERPROOF_CLIENT_SECRET' => nil
+                          ))
       end
 
       it 'raises an error' do
-        expect { client.send(:auth_token) }.to raise_error(
-          CfaSecurityControls::Hyperproof::Clients::Hyperproof::Unauthorized,
-          'Missing Hyperproof credentials'
-        )
+        expect { client.send(:auth_token) }.to \
+          raise_error(ConfigSL::ValidationError)
       end
     end
   end
