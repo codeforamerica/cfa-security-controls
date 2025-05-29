@@ -60,7 +60,7 @@ jobs:
           working-directory: ${{ matrix.dir }}
       - name: RuboCop Linter
         working-directory: ${{ matrix.dir }}
-        run: bundle exec rake rubocop
+        run: bundle exec rubocop --format github
 
   spec:
     name: Run ruby tests
