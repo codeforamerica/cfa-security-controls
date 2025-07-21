@@ -1,5 +1,5 @@
 # Code for America Security Controls
 
-This repository contains the configuration for our AWS security controls. These
-configurations ensure that our AWS accounts are secure and meet our compliance
+This repository contains the configuration and automation for our security
+controls. These ensure that our organization is secure and meets our compliance
 requirements.

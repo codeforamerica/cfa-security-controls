@@ -11,16 +11,36 @@ module CfaSecurityControls
   module Hyperproof
     # CLI tool for the CFA Security Controls Hyperproof integration.
     class CLI < Thor
+      def self.exit_on_failure?
+        true
+      end
+
       desc 'collect', 'Collect and sync all proofs to Hyperproof'
       def collect
         say 'Collecting proofs...', :green
-        CfaSecurityControls::Hyperproof.run
-        say 'All proofs collected and synced to Hyperproof.', :green
+        results = CfaSecurityControls::Hyperproof.run
+        if results.values.any?(false)
+          say_error "#{results.values.tally[false]} proofs failed to collect.", :red
+          exit 1
+        end
+
+        say "Collected and synced #{bold(results.length)} proofs to Hypersync.", :green
       end
 
       desc 'version', 'Show the current version'
       def version
         say CfaSecurityControls::Hyperproof::VERSION
+      end
+
+      # Helper methods that will not be exposed as commands.
+      no_commands do
+        # Bold a string for terminal output.
+        #
+        # @param string [String] The string to bold.
+        # @return [String] The bolded string.
+        def bold(string)
+          "\e[1m#{string}\e[22m"
+        end
       end
     end
   end

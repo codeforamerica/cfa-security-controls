@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'concurrent-ruby'
+
 require_relative 'hyperproof/config'
 require_relative 'hyperproof/entities/label'
 require_relative 'hyperproof/entities/proof'
@@ -30,14 +32,41 @@ module CfaSecurityControls
     def self.run
       Dir.mktmpdir do |dir|
         config.logger.info("Writing proofs to #{dir}")
+
         writer = Writer.new(dir)
-        Proofs.proofs.map do |klass|
-          proof = klass.new
-          filename = collect_proof(proof, writer)
-          Entities::Proof.new(File.basename(filename), label: proof_label(proof))
-                         .create(filename)
+        futures = Proofs.proofs.map do |klass|
+          Concurrent::Promises.future(executor: config.thread_pool) do
+            create_proof(klass.new, writer)
+          end.run
         end
+
+        # Wait for all futures to complete and collect results.
+        Concurrent::Promises.zip(*futures).value!.to_h
       end
+    end
+
+    # Create the proof in Hyperproof.
+    #
+    # @param proof [Proofs::Proof] The proof to create.
+    # @param writer [Writer] The writer to use for formatting the proof.
+    # @return [Array] A promise response containing the proof name and its ID.
+    private_class_method def self.create_proof(proof, writer)
+      filename = collect_proof(proof, writer)
+      entity = Entities::Proof.new(File.basename(filename), label: proof_label(proof))
+      entity.create(filename)
+      [proof.name, entity.id]
+    rescue StandardError => e
+      handle_exception(proof, e)
+    end
+
+    # Handle exceptions that occur during proof collection.
+    #
+    # @param proof [Proofs::Proof] The proof that was being processed.
+    # @param error [StandardError] The error that occurred.
+    # @return [Array] Valid promise repose representing a failure.
+    private_class_method def self.handle_exception(proof, error)
+      config.logger.error("An error occurred: #{error.message}")
+      [proof.name, false]
     end
 
     # Collect evidence for a specific proof.
