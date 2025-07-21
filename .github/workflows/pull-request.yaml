@@ -2,6 +2,8 @@ name: Pull request checks
 
 on:
   pull_request:
+    paths:
+      - 'tofu/config/**'
 
 permissions:
   contents: read
