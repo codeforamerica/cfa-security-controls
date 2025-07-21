@@ -10,7 +10,10 @@ RSpec.describe CfaSecurityControls::Hyperproof do
   end
 
   let(:entity) do
-    instance_double(CfaSecurityControls::Hyperproof::Entities::Proof, create: true)
+    instance_double(CfaSecurityControls::Hyperproof::Entities::Proof, create: true).tap do |entity|
+      # Allow the entity to return an ID, but only once create has been called.
+      allow(entity).to receive(:create) { allow(entity).to receive(:id).and_return(123) }
+    end
   end
 
   let(:label) do
