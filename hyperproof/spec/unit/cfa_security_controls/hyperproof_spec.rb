@@ -37,6 +37,20 @@ RSpec.describe CfaSecurityControls::Hyperproof do
       expect(proof).to have_received(:write).with(writer)
     end
 
+    it 'returns the id for successfully processed proofs' do
+      expect(described_class.run['proof_file']).to eq(123)
+    end
+
+    context 'when the proof fails to process' do
+      before do
+        allow(proof).to receive(:write).and_raise(RuntimeError, 'Failed to write proof')
+      end
+
+      it 'returns false for the proof' do
+        expect(described_class.run['proof_file']).to be(false)
+      end
+    end
+
     context 'when the label exists' do
       it 'does not create a new label' do
         described_class.run
@@ -61,6 +75,35 @@ RSpec.describe CfaSecurityControls::Hyperproof do
       described_class.run
 
       expect(entity).to have_received(:create).with('/tmp/test_dir/proof_file.csv')
+    end
+  end
+
+  describe '.collect' do
+    before do
+      allow(Dir).to receive(:mktmpdir).and_yield('/tmp/test_dir')
+      allow(CfaSecurityControls::Hyperproof::Writer).to receive(:new).and_return(writer)
+      allow(CfaSecurityControls::Hyperproof::Proofs).to receive(:proofs).and_return([proof_klass])
+      allow(proof_klass).to receive(:new).and_return(proof)
+    end
+
+    it 'writes the proof to a file' do
+      described_class.collect
+
+      expect(proof).to have_received(:write).with(writer)
+    end
+
+    it 'returns the filename for the collected proof' do
+      expect(described_class.collect['proof_file']).to eq('/tmp/test_dir/proof_file.csv')
+    end
+
+    context 'when the proof fails to process' do
+      before do
+        allow(proof).to receive(:write).and_raise(RuntimeError, 'Failed to write proof')
+      end
+
+      it 'returns false for the proof' do
+        expect(described_class.collect['proof_file']).to be(false)
+      end
     end
   end
 end

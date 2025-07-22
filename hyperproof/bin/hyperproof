@@ -18,6 +18,18 @@ module CfaSecurityControls
       desc 'collect', 'Collect and sync all proofs to Hyperproof'
       def collect
         say 'Collecting proofs...', :green
+        results = CfaSecurityControls::Hyperproof.collect
+        if results.values.any?(false)
+          say_error "#{results.values.tally[false]} proofs failed to collect.", :red
+          exit 1
+        end
+
+        say "Collected #{bold(results.length)} proofs to Hypersync.", :green
+      end
+
+      desc 'sync', 'Collect and sync all proofs to Hyperproof'
+      def sync
+        say 'Collecting and syncing proofs...', :green
         results = CfaSecurityControls::Hyperproof.run
         if results.values.any?(false)
           say_error "#{results.values.tally[false]} proofs failed to collect.", :red

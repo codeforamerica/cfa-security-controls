@@ -24,9 +24,9 @@ module CfaSecurityControls
       private_class_method def self.proofs_for_namespace(namespace)
         namespace.constants.each_with_object([]) do |const_name, collectors|
           const = namespace.const_get(const_name)
-          if const.is_a?(Class) && const.method_defined?(:collect)
+          if const.is_a?(Class) && const.method_defined?(:collect) && const.instance_methods(false).include?(:name)
             collectors << const
-          else
+          elsif const.is_a?(Module)
             collectors.concat(proofs_for_namespace(const))
           end
         end

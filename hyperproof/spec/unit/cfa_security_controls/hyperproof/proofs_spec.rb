@@ -16,12 +16,14 @@ RSpec.describe CfaSecurityControls::Hyperproof::Proofs do
 
       let(:proof_class) do
         Class.new do
+          def name; end
           def collect; end
         end
       end
 
       let(:nested_class) do
         Class.new do
+          def name; end
           def collect; end
         end
       end

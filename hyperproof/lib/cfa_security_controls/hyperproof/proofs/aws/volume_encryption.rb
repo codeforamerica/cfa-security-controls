@@ -6,29 +6,29 @@ module CfaSecurityControls
   module Hyperproof
     module Proofs
       module AWS
-        # Database encryption evidence for AWS.
-        class DatabaseEncryption < Base
+        # EC2 volume encryption evidence for AWS.
+        class VolumeEncryption < Base
           def name
-            'AWS Database Encryption'
+            'AWS Volume Encryption'
           end
 
           def label
-            'Database Encryption'
+            'Disk Encryption'
           end
 
           private
 
           def resource_type
-            'AWS::RDS::DBInstance'
+            'AWS::EC2::Volume'
           end
 
           def fields
-            super + %w[configuration.storageEncrypted configuration.kmsKeyId]
+            super + %w[configuration.encrypted configuration.kmsKeyId]
           end
 
           def field_map
             {
-              'configuration.storageEncrypted' => :encrypted,
+              'configuration.encrypted' => :encrypted,
               'configuration.kmsKeyId' => :kmsKeyId
             }
           end

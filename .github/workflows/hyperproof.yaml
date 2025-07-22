@@ -1,6 +1,8 @@
 name: Hyperproof Sync
 
 on:
+  schedule:
+    - cron: '0 0 1 * *'
   workflow_dispatch:
     inputs:
       environment:
@@ -14,10 +16,12 @@ permissions:
 
 jobs:
   collect:
+    name: Collect and sync evidence with Hyperproof
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
+    environment: ${{ github.event.inputs.environment || 'production' }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
       - name: Set up Ruby
@@ -36,4 +40,4 @@ jobs:
           HYPERPROOF_CLIENT_ID: ${{ secrets.HYPERPROOF_CLIENT_ID }}
           HYPERPROOF_CLIENT_SECRET: ${{ secrets.HYPERPROOF_CLIENT_SECRET }}
         run:
-          bin/hyperproof collect
+          bin/hyperproof sync
