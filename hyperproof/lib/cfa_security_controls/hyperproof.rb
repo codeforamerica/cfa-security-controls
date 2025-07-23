@@ -30,18 +30,19 @@ module CfaSecurityControls
 
     # Collect and upload all proofs to Hyperproof.
     def self.run
-      Dir.mktmpdir do |dir|
-        config.logger.info("Writing proofs to #{dir}")
+      collect_proofs do |proof, writer|
+        create_proof(proof, writer)
+      end
+    end
 
-        writer = Writer.new(dir)
-        futures = Proofs.proofs.map do |klass|
-          Concurrent::Promises.future(executor: config.thread_pool) do
-            create_proof(klass.new, writer)
-          end.run
-        end
-
-        # Wait for all futures to complete and collect results.
-        Concurrent::Promises.zip(*futures).value!.to_h
+    # Collect all proofs, but don't upload them to Hyperproof.
+    def self.collect
+      collect_proofs do |proof, writer|
+        filename = collect_proof(proof, writer)
+        config.logger.debug("Collected proof for #{proof.name} to #{filename}")
+        [proof.name, filename]
+      rescue StandardError => e
+        handle_exception(proof, e)
       end
     end
 
@@ -53,6 +54,7 @@ module CfaSecurityControls
     private_class_method def self.create_proof(proof, writer)
       filename = collect_proof(proof, writer)
       entity = Entities::Proof.new(File.basename(filename), label: proof_label(proof))
+      config.logger.debug("Syncing proof for #{proof.name} (#{proof.label}) at #{filename}")
       entity.create(filename)
       [proof.name, entity.id]
     rescue StandardError => e
@@ -77,6 +79,23 @@ module CfaSecurityControls
     private_class_method def self.collect_proof(proof, writer)
       config.logger.debug("Collecting proof for #{proof.name} (#{proof.label})")
       proof.write(writer)
+    end
+
+    # Collect all proofs and yield to the caller for processing.
+    private_class_method def self.collect_proofs(&)
+      Dir.mktmpdir do |dir|
+        config.logger.info("Writing proofs to #{dir}")
+
+        writer = Writer.new(dir)
+        futures = Proofs.proofs.map do |klass|
+          Concurrent::Promises.future(executor: config.thread_pool) do
+            yield klass.new, writer
+          end.run
+        end
+
+        # Wait for all futures to complete and collect results.
+        Concurrent::Promises.zip(*futures).value!.to_h
+      end
     end
 
     # Get the label for a proof.
