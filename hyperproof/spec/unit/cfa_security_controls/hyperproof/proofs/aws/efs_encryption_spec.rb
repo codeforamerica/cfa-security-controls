@@ -25,13 +25,13 @@ RSpec.describe CfaSecurityControls::Hyperproof::Proofs::AWS::EFSEncryption do
       allow(client).to receive(:select_aggregate_resource_config).and_return(response)
     end
 
-    context 'when there are no volumes' do
+    context 'when there are no file systems' do
       it 'returns an empty array' do
         expect(proof.collect).to eq([])
       end
     end
 
-    context 'when there are volumes' do
+    context 'when there are file systems' do
       let(:data) do
         [
           {
@@ -63,7 +63,7 @@ RSpec.describe CfaSecurityControls::Hyperproof::Proofs::AWS::EFSEncryption do
         ]
       end
 
-      it 'returns an array of volumes' do
+      it 'returns an array of file systems' do
         expect(proof.collect).to eq(
           [
             {
