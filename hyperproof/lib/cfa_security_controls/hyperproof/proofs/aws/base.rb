@@ -31,7 +31,7 @@ module CfaSecurityControls
           #
           # @return [String] The resource type.
           #
-          # # @raise [NotImplementedError] If the method is not overridden.
+          # @raise [NotImplementedError] If the method is not overridden.
           def resource_type
             raise NotImplementedError, 'This method should be overridden'
           end
