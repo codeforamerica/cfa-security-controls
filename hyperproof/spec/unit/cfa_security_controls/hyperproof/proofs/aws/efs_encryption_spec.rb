@@ -69,7 +69,8 @@ RSpec.describe CfaSecurityControls::Hyperproof::Proofs::AWS::EFSEncryption do
             {
               accountId: '123456789012', resourceId: 'fs-01234567',
               awsRegion: 'us-east-1', availabilityZone: 'us-east-1b',
-              resourceName: 'rspec-test', arn: 'arn:aws:elasticfilesystem:us-east-1:123456789012:file-system/fs-01234567',
+              resourceName: 'rspec-test',
+              arn: 'arn:aws:elasticfilesystem:us-east-1:123456789012:file-system/fs-01234567',
               tags: { environment: 'test', project: 'rspec' },
               encrypted: true,
               kmsKeyId: 'arn:aws:kms:us-east-1:123456789012:key/abcd1234-56ef-78gh-90ij-klmnopqrstuv'
@@ -77,7 +78,8 @@ RSpec.describe CfaSecurityControls::Hyperproof::Proofs::AWS::EFSEncryption do
             {
               accountId: '123456789012', resourceId: 'fs-01234568',
               awsRegion: 'us-west-2', availabilityZone: 'us-west-2a',
-              resourceName: 'rspec-prod', arn: 'arn:aws:elasticfilesystem:us-west-2:123456789012:file-system/fs-01234568',
+              resourceName: 'rspec-prod',
+              arn: 'arn:aws:elasticfilesystem:us-west-2:123456789012:file-system/fs-01234568',
               tags: { environment: 'prod', project: 'rspec' },
               encrypted: true,
               kmsKeyId: 'arn:aws:kms:us-west-2:123456789012:key/4321dcba-56ef-78gh-90ij-klmnopqrstuv'
