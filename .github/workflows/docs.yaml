@@ -25,7 +25,7 @@ permissions:
 jobs:
   deploy:
     name: Deploy Documentation to ${{ inputs.environment || 'development' }}
-    environment: ${{ inputs.environment || 'production'}}
+    environment: ${{ inputs.environment || 'development'}}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
