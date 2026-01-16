@@ -1,0 +1,84 @@
+site_name: Security Controls
+repo_url: https://github.com/codeforamerica/cfa-security-controls
+edit_uri: edit/main/docs/
+
+plugins:
+  - mkdocs-nav-weight
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - github-callouts
+  - footnotes
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra_javascript:
+  - assets/javascripts/mermaid.js
+theme:
+  name: material
+  icon:
+    logo: material/cloud-lock
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - content.code.copy
+    - content.code.select
+    - content.action.edit
+    - navigation.path
+    - navigation.top
+    - toc.follow
+    - toc.integrate
+    - search.highlight
+    - search.suggest
+
+extra:
+  generator: false
+  social:
+    - icon: material/web
+      link: https://codeforamerica.org/
+      name: Code for America website
+    - icon: fontawesome/brands/github
+      link: https://github.com/codeforamerica
+      name: Code for America on GitHub
+    - icon: fontawesome/brands/threads
+      link: https://www.threads.net/@codeforamerica
+      name: Code for America on Threads
+    - icon: fontawesome/brands/bluesky
+      link: https://bsky.app/profile/codeforamerica.org
+      name: Code for America Bluesky
+
+copyright: Produced by Code for America under the MIT license.
