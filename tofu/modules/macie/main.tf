@@ -14,6 +14,7 @@ module "macie" {
   finding_publishing_frequency = "FIFTEEN_MINUTES"
 
   providers = {
+    aws       = aws
     aws.admin = aws
   }
 }
@@ -56,6 +57,30 @@ data "aws_iam_policy_document" "macie_kms" {
       "kms:Decrypt"
     ]
     resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+  }
+
+  statement {
+    sid    = "Allow S3 to use the key for logs"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["s3.amazonaws.com"]
+    }
+    actions = [
+      "kms:GenerateDataKey",
+      "kms:Encrypt"
+    ]
+    resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
   }
 }
 
@@ -72,14 +97,14 @@ resource "aws_s3_bucket" "logs" {
 resource "aws_s3_bucket_versioning" "results" {
   bucket = aws_s3_bucket.results.id
   versioning_configuration {
-    status = "ENABLED"
+    status = "Enabled"
   }
 }
 
 resource "aws_s3_bucket_versioning" "logs" {
   bucket = aws_s3_bucket.logs.id
   versioning_configuration {
-    status = "ENABLED"
+    status = "Enabled"
   }
 }
 
@@ -106,7 +131,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      kms_master_key_id = aws_kms_key.macie.arn
+      sse_algorithm     = "aws:kms"
     }
   }
 }
@@ -198,10 +224,26 @@ resource "aws_macie2_classification_export_configuration" "results" {
   ]
 }
 
+data "external" "reveal_configuration" {
+  program = [
+    "aws", "macie2", "get-reveal-configuration",
+    "--query", "{status: configuration.status, kmsKeyId: configuration.kmsKeyId}",
+    "--output", "json", "--region", data.aws_region.current.name
+  ]
+}
+
 # Enable feature to retrieve and reveal sensitive data samples.
-resource "aws_macie2_reveal_configuration" "reveal" {
-  status     = "ENABLED"
-  kms_key_id = aws_kms_key.macie.key_id
+# There is no native Terraform resource for this yet.
+resource "terraform_data" "reveal" {
+  # Trigger when status is not ENABLED or KMS key changes.
+  triggers_replace = [
+    data.external.reveal_configuration.result.status != "ENABLED" ? "ENABLE" : "STAY",
+    data.external.reveal_configuration.result.kmsKeyId != aws_kms_key.macie.key_id ? aws_kms_key.macie.key_id : "SAME"
+  ]
+
+  provisioner "local-exec" {
+    command = "aws macie2 update-reveal-configuration --configuration status=ENABLED,kmsKeyId=${aws_kms_key.macie.key_id} --region ${data.aws_region.current.name}"
+  }
 }
 
 data "external" "template_id" {
