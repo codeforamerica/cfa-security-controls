@@ -1,5 +1,11 @@
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
+data "aws_partition" "current" {}
+
+locals {
+  results_bucket = "security-macie-results-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
+  logs_bucket    = "security-macie-logs-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
+}
 
 module "macie" {
   source  = "cloudposse/macie/aws"
@@ -24,7 +30,10 @@ resource "aws_kms_key" "macie" {
   description             = "KMS key for Amazon Macie findings and samples"
   deletion_window_in_days = 30
   enable_key_rotation     = true
-  policy                  = data.aws_iam_policy_document.macie_kms.json
+  policy = jsonencode(yamldecode(templatefile("${path.module}/templates/kms-key-policy.yaml.tftpl", {
+    partition = data.aws_partition.current.partition
+    account   = data.aws_caller_identity.current.account_id
+  })))
 }
 
 resource "aws_kms_alias" "macie" {
@@ -32,194 +41,99 @@ resource "aws_kms_alias" "macie" {
   target_key_id = aws_kms_key.macie.key_id
 }
 
-data "aws_iam_policy_document" "macie_kms" {
-  statement {
-    sid    = "Enable IAM User Permissions"
-    effect = "Allow"
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
-    }
-    actions   = ["kms:*"]
-    resources = ["*"]
-  }
+# Logging bucket for Macie results bucket.
+module "logs" {
+  source  = "boldlink/s3/aws"
+  version = "2.6.0"
 
-  statement {
-    sid    = "Allow Macie to use the key"
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["macie.amazonaws.com"]
-    }
-    actions = [
-      "kms:GenerateDataKey",
-      "kms:Encrypt",
-      "kms:Decrypt"
-    ]
-    resources = ["*"]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = [data.aws_caller_identity.current.account_id]
-    }
-  }
+  bucket = local.logs_bucket
 
-  statement {
-    sid    = "Allow S3 to use the key for logs"
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["s3.amazonaws.com"]
+  bucket_policy = jsonencode(yamldecode(templatefile("${path.module}/templates/logs-bucket-policy.yaml.tftpl", {
+    partition = data.aws_partition.current.partition
+    account   = data.aws_caller_identity.current.account_id
+    bucket    = local.logs_bucket
+  })))
+
+  lifecycle_configuration = [{
+    id     = "logs"
+    status = "Enabled"
+
+    filter = {
+      prefix = ""
     }
-    actions = [
-      "kms:GenerateDataKey",
-      "kms:Encrypt"
-    ]
-    resources = ["*"]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = [data.aws_caller_identity.current.account_id]
+
+    abort_incomplete_multipart_upload_days = 7
+
+    noncurrent_version_expiration = [{
+      noncurrent_days = 30
+    }]
+
+    expiration = {
+      days = var.logs_retention_period
     }
-  }
+  }]
+
+  sse_bucket_key_enabled = true
+  sse_kms_master_key_arn = aws_kms_key.macie.arn
+  sse_sse_algorithm      = "aws:kms"
+
+  versioning_status = "Enabled"
 }
 
 # S3 bucket for storing sensitive data discovery results.
-resource "aws_s3_bucket" "results" {
-  bucket = "security-macie-results-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
-}
+module "results" {
+  source  = "boldlink/s3/aws"
+  version = "2.6.0"
 
-# Logging bucket for Macie results bucket.
-resource "aws_s3_bucket" "logs" {
-  bucket = "security-macie-logs-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
-}
+  bucket = local.results_bucket
 
-resource "aws_s3_bucket_versioning" "results" {
-  bucket = aws_s3_bucket.results.id
-  versioning_configuration {
+  bucket_policy = jsonencode(yamldecode(templatefile("${path.module}/templates/results-bucket-policy.yaml.tftpl", {
+    partition = data.aws_partition.current.partition
+    account   = data.aws_caller_identity.current.account_id
+    bucket    = local.results_bucket
+  })))
+
+  lifecycle_configuration = [{
+    id     = "results"
     status = "Enabled"
-  }
-}
 
-resource "aws_s3_bucket_versioning" "logs" {
-  bucket = aws_s3_bucket.logs.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-resource "aws_s3_bucket_logging" "results" {
-  bucket = aws_s3_bucket.results.id
-
-  target_bucket = aws_s3_bucket.logs.id
-  target_prefix = "results/"
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "results" {
-  bucket = aws_s3_bucket.results.id
-
-  rule {
-    apply_server_side_encryption_by_default {
-      kms_master_key_id = aws_kms_key.macie.arn
-      sse_algorithm     = "aws:kms"
+    filter = {
+      prefix = ""
     }
-  }
-}
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
-  bucket = aws_s3_bucket.logs.id
+    abort_incomplete_multipart_upload_days = 7
 
-  rule {
-    apply_server_side_encryption_by_default {
-      kms_master_key_id = aws_kms_key.macie.arn
-      sse_algorithm     = "aws:kms"
+    noncurrent_version_expiration = [{
+      noncurrent_days = 30
+    }]
+
+    expiration = {
+      days = var.results_retention_period
     }
-  }
-}
+  }]
 
-resource "aws_s3_bucket_public_access_block" "results" {
-  bucket = aws_s3_bucket.results.id
+  sse_bucket_key_enabled = true
+  sse_kms_master_key_arn = aws_kms_key.macie.arn
+  sse_sse_algorithm      = "aws:kms"
 
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
+  versioning_status = "Enabled"
 
-resource "aws_s3_bucket_public_access_block" "logs" {
-  bucket = aws_s3_bucket.logs.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-resource "aws_s3_bucket_policy" "results" {
-  bucket = aws_s3_bucket.results.id
-  policy = data.aws_iam_policy_document.results_bucket_policy.json
-}
-
-resource "aws_s3_bucket_policy" "logs" {
-  bucket = aws_s3_bucket.logs.id
-  policy = data.aws_iam_policy_document.logs_bucket_policy.json
-}
-
-data "aws_iam_policy_document" "logs_bucket_policy" {
-  statement {
-    sid    = "Allow S3 Logging"
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["logging.s3.amazonaws.com"]
-    }
-    actions = ["s3:PutObject"]
-    resources = [
-      "${aws_s3_bucket.logs.arn}/*"
-    ]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = [data.aws_caller_identity.current.account_id]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "results_bucket_policy" {
-  statement {
-    sid    = "Allow Macie to write results"
-    effect = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["macie.amazonaws.com"]
-    }
-    actions = [
-      "s3:GetBucketLocation",
-      "s3:PutObject",
-      "s3:ListBucket"
-    ]
-    resources = [
-      aws_s3_bucket.results.arn,
-      "${aws_s3_bucket.results.arn}/*"
-    ]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = [data.aws_caller_identity.current.account_id]
-    }
+  s3_logging = {
+    target_bucket = module.logs.id
+    target_prefix = "results/"
   }
 }
 
 # Configure Macie to export discovery results to the S3 bucket.
 resource "aws_macie2_classification_export_configuration" "results" {
   s3_destination {
-    bucket_name = aws_s3_bucket.results.bucket
+    bucket_name = module.results.id
     key_prefix  = "results/"
     kms_key_arn = aws_kms_key.macie.arn
   }
 
   depends_on = [
-    aws_s3_bucket_policy.results,
+    module.results,
     aws_kms_key.macie
   ]
 }
@@ -259,10 +173,10 @@ resource "terraform_data" "template" {
 
   # Trigger replacement when the template file changes.
   triggers_replace = [
-    filesha256("${path.module}/template.yaml")
+    filesha256("${path.module}/templates/sensitivity-inspection-template.yaml")
   ]
 
   provisioner "local-exec" {
-    command = "aws macie2 update-sensitivity-inspection-template --id ${data.external.template_id.result.id} --region ${data.aws_region.current.name} --cli-input-yaml file://${path.module}/template.yaml"
+    command = "aws macie2 update-sensitivity-inspection-template --id ${data.external.template_id.result.id} --region ${data.aws_region.current.name} --cli-input-yaml file://${path.module}/templates/sensitivity-inspection-template.yaml"
   }
 }

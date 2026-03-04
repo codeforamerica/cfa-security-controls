@@ -1,0 +1,31 @@
+Version: "2012-10-17"
+Statement:
+  - Sid: Enable IAM User Permissions
+    Effect: Allow
+    Principal:
+      AWS: arn:${partition}:iam::${account}:root
+    Action: kms:*
+    Resource: "*"
+  - Sid: Allow Macie to use the key
+    Effect: Allow
+    Principal:
+      Service: macie.amazonaws.com
+    Action:
+      - kms:GenerateDataKey
+      - kms:Encrypt
+      - kms:Decrypt
+    Resource: "*"
+    Condition:
+      StringEquals:
+        aws:SourceAccount: "${account}"
+  - Sid: Allow S3 to use the key for logs
+    Effect: Allow
+    Principal:
+      Service: s3.amazonaws.com
+    Action:
+      - kms:GenerateDataKey
+      - kms:Encrypt
+    Resource: "*"
+    Condition:
+      StringEquals:
+        aws:SourceAccount: "${account}"
