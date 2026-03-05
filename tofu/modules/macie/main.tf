@@ -173,10 +173,10 @@ resource "terraform_data" "template" {
 
   # Trigger replacement when the template file changes.
   triggers_replace = [
-    filesha256("${path.module}/templates/sensitivity-inspection-template.yaml")
+    filesha256("${path.module}/template.yaml")
   ]
 
   provisioner "local-exec" {
-    command = "aws macie2 update-sensitivity-inspection-template --id ${data.external.template_id.result.id} --region ${data.aws_region.current.name} --cli-input-yaml file://${path.module}/templates/sensitivity-inspection-template.yaml"
+    command = "aws macie2 update-sensitivity-inspection-template --id ${data.external.template_id.result.id} --region ${data.aws_region.current.name} --cli-input-yaml file://${path.module}/template.yaml"
   }
 }
