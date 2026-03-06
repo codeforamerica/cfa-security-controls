@@ -1,0 +1,27 @@
+Version: "2012-10-17"
+Statement:
+  - Sid: AllowSSLRequestsOnly
+    Effect: Deny
+    Principal: "*"
+    Action:
+      - s3:*
+    Resource:
+      - arn:${partition}:s3:::${bucket}
+      - arn:${partition}:s3:::${bucket}/*
+    Condition:
+      Bool:
+        aws:SecureTransport: false
+  - Sid: Allow Macie to write results
+    Effect: Allow
+    Principal:
+      Service: macie.amazonaws.com
+    Action:
+      - s3:GetBucketLocation
+      - s3:PutObject
+      - s3:ListBucket
+    Resource:
+      - arn:${partition}:s3:::${bucket}
+      - arn:${partition}:s3:::${bucket}/*
+    Condition:
+      StringEquals:
+        aws:SourceAccount: "${account}"
