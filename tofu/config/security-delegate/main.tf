@@ -44,6 +44,27 @@ module "automations" {
   }
 }
 
+# Configure GuardDuty in each region.
+# To import existing detectors and features (detector IDs are region-specific UUIDs):
+#   for region in us-east-1 us-east-2 us-west-1 us-west-2; do
+#     id=$(aws guardduty list-detectors --region $region --query 'DetectorIds[0]' --output text)
+#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector.this" $id
+#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.ebs_malware_protection" "$id/EBS_MALWARE_PROTECTION"
+#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.eks_audit_logs" "$id/EKS_AUDIT_LOGS"
+#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.lambda_protection" "$id/LAMBDA_NETWORK_LOGS"
+#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.rds_protection" "$id/RDS_LOGIN_EVENTS"
+#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.runtime_monitoring" "$id/RUNTIME_MONITORING"
+#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.s3_data_events" "$id/S3_DATA_EVENTS"
+#   done
+module "guardduty" {
+  for_each = local.regions
+  source   = "../../modules/guardduty"
+
+  providers = {
+    aws = aws.by_region[each.key]
+  }
+}
+
 # Configure Macie in each region.
 module "macie" {
   for_each = local.regions
@@ -76,6 +97,18 @@ import {
   for_each = local.regions
   to       = module.security_hub[each.key].aws_securityhub_account.this
   id       = data.aws_caller_identity.current.account_id
+}
+
+# Import existing product subscriptions.
+import {
+  for_each = {
+    for pair in setproduct(
+      tolist(local.regions),
+      ["aws/guardduty"]
+    ) : "${pair[0]}/${pair[1]}" => { region = pair[0], product = pair[1] }
+  }
+  to = module.security_hub[each.value.region].aws_securityhub_product_subscription.this[each.value.product]
+  id = "arn:aws:securityhub:${each.value.region}:${data.aws_caller_identity.current.account_id}:product-subscription/${each.value.product}"
 }
 
 # Import existing standards subscriptions.

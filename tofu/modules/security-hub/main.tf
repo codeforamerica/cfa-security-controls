@@ -6,6 +6,14 @@ resource "aws_securityhub_account" "this" {
   enable_default_standards  = false
 }
 
+resource "aws_securityhub_product_subscription" "this" {
+  for_each = toset(var.products)
+
+  product_arn = "arn:aws:securityhub:${data.aws_region.current.name}::product/${each.key}"
+
+  depends_on = [aws_securityhub_account.this]
+}
+
 resource "aws_securityhub_standards_subscription" "this" {
   for_each = toset(var.standards)
 
