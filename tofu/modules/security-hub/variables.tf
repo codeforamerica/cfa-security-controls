@@ -7,7 +7,11 @@ variable "auto_enable_controls" {
 variable "products" {
   description = "AWS Security Hub product integrations to subscribe to. Each value should be the product path (e.g., 'aws/guardduty')."
   type        = list(string)
-  default     = ["aws/guardduty"]
+  default = [
+    "aws/guardduty",
+    "aws/inspector",
+    "aws/macie",
+  ]
 }
 
 variable "standards" {

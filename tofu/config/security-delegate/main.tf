@@ -65,6 +65,16 @@ module "guardduty" {
   }
 }
 
+# Configure Amazon Inspector in each region.
+module "inspector" {
+  for_each = local.regions
+  source   = "../../modules/inspector"
+
+  providers = {
+    aws = aws.by_region[each.key]
+  }
+}
+
 # Configure Macie in each region.
 module "macie" {
   for_each = local.regions
@@ -99,12 +109,19 @@ import {
   id       = data.aws_caller_identity.current.account_id
 }
 
+# Import existing Amazon Inspector enablement.
+import {
+  for_each = local.regions
+  to       = module.inspector[each.key].aws_inspector2_enabler.this
+  id       = "${data.aws_caller_identity.current.account_id}:${join(",", sort(["EC2", "ECR", "LAMBDA", "LAMBDA_CODE"]))}"
+}
+
 # Import existing product subscriptions.
 import {
   for_each = {
     for pair in setproduct(
       tolist(local.regions),
-      ["aws/guardduty"]
+      ["aws/guardduty", "aws/inspector", "aws/macie"]
     ) : "${pair[0]}/${pair[1]}" => { region = pair[0], product = pair[1] }
   }
   to = module.security_hub[each.value.region].aws_securityhub_product_subscription.this[each.value.product]
