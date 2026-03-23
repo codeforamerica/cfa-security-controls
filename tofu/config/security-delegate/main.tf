@@ -109,14 +109,8 @@ import {
   id       = data.aws_caller_identity.current.account_id
 }
 
-# Import existing Amazon Inspector enablement.
-import {
-  for_each = local.regions
-  to       = module.inspector[each.key].aws_inspector2_enabler.this
-  id       = "${data.aws_caller_identity.current.account_id}:${join(",", sort(["EC2", "ECR", "LAMBDA", "LAMBDA_CODE"]))}"
-}
-
 # Import existing product subscriptions.
+# ID format: PRODUCT_ARN,SUBSCRIPTION_ARN
 import {
   for_each = {
     for pair in setproduct(
@@ -125,7 +119,7 @@ import {
     ) : "${pair[0]}/${pair[1]}" => { region = pair[0], product = pair[1] }
   }
   to = module.security_hub[each.value.region].aws_securityhub_product_subscription.this[each.value.product]
-  id = "arn:aws:securityhub:${each.value.region}:${data.aws_caller_identity.current.account_id}:product-subscription/${each.value.product}"
+  id = "arn:aws:securityhub:${each.value.region}::product/${each.value.product},arn:aws:securityhub:${each.value.region}:${data.aws_caller_identity.current.account_id}:product-subscription/${each.value.product}"
 }
 
 # Import existing standards subscriptions.
