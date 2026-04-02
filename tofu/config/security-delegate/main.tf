@@ -45,17 +45,7 @@ module "automations" {
 }
 
 # Configure GuardDuty in each region.
-# To import existing detectors and features (detector IDs are region-specific UUIDs):
-#   for region in us-east-1 us-east-2 us-west-1 us-west-2; do
-#     id=$(aws guardduty list-detectors --region $region --query 'DetectorIds[0]' --output text)
-#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector.this" $id
-#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.ebs_malware_protection" "$id/EBS_MALWARE_PROTECTION"
-#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.eks_audit_logs" "$id/EKS_AUDIT_LOGS"
-#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.lambda_protection" "$id/LAMBDA_NETWORK_LOGS"
-#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.rds_protection" "$id/RDS_LOGIN_EVENTS"
-#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.runtime_monitoring" "$id/RUNTIME_MONITORING"
-#     tofu import "module.guardduty[\"$region\"].aws_guardduty_detector_feature.s3_data_events" "$id/S3_DATA_EVENTS"
-#   done
+# Run scripts/import-guardduty.sh before the first apply.
 module "guardduty" {
   for_each = local.regions
   source   = "../../modules/guardduty"
@@ -86,11 +76,7 @@ module "macie" {
 }
 
 # Cross-region aggregation: aggregate findings from all linked regions into the primary region.
-# To import the existing aggregator, get its ARN first:
-#   aws securityhub list-finding-aggregators --region us-east-1 \
-#     --query 'FindingAggregators[0].FindingAggregatorArn' --output text
-# Then run:
-#   tofu import 'aws_securityhub_finding_aggregator.this' '<ARN>'
+# Run scripts/import-security-hub.sh before the first apply.
 resource "aws_securityhub_finding_aggregator" "this" {
   provider          = aws.by_region[local.primary_region]
   linking_mode      = "SPECIFIED_REGIONS"
