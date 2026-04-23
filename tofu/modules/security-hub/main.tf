@@ -1,5 +1,3 @@
-data "aws_region" "current" {}
-
 resource "aws_securityhub_account" "this" {
   auto_enable_controls      = var.auto_enable_controls
   control_finding_generator = "SECURITY_CONTROL"

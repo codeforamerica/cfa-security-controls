@@ -1,7 +1,3 @@
-locals {
-  definitions = yamldecode(file("${path.module}/rules/definitions.yaml"))
-}
-
 resource "aws_securityhub_automation_rule" "rules" {
   for_each = { for rule in local.definitions.Rules : rule.RuleName => rule }
 
