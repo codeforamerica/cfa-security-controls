@@ -1,12 +1,3 @@
-data "aws_region" "current" {}
-data "aws_caller_identity" "current" {}
-data "aws_partition" "current" {}
-
-locals {
-  results_bucket = "security-macie-results-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
-  logs_bucket    = "security-macie-logs-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
-}
-
 module "macie" {
   source  = "cloudposse/macie/aws"
   version = "0.1.3"
@@ -138,14 +129,6 @@ resource "aws_macie2_classification_export_configuration" "results" {
   ]
 }
 
-data "external" "reveal_configuration" {
-  program = [
-    "aws", "macie2", "get-reveal-configuration",
-    "--query", "{status: configuration.status, kmsKeyId: configuration.kmsKeyId}",
-    "--output", "json", "--region", data.aws_region.current.name
-  ]
-}
-
 # Enable feature to retrieve and reveal sensitive data samples.
 # There is no native Terraform resource for this yet.
 resource "terraform_data" "reveal" {
@@ -158,14 +141,6 @@ resource "terraform_data" "reveal" {
   provisioner "local-exec" {
     command = "aws macie2 update-reveal-configuration --configuration status=ENABLED,kmsKeyId=${aws_kms_key.macie.key_id} --region ${data.aws_region.current.name}"
   }
-}
-
-data "external" "template_id" {
-  program = [
-    "aws", "macie2", "list-sensitivity-inspection-templates", "--query",
-    "sensitivityInspectionTemplates[?name=='automated-sensitive-data-discovery'] | [0] | {id: id}",
-    "--output", "json", "--region", data.aws_region.current.name
-  ]
 }
 
 resource "terraform_data" "template" {
