@@ -1,11 +1,17 @@
 variable "auto_enable_controls" {
-  description = "Whether to automatically enable new controls when they are added to a subscribed standard."
+  description = <<-EOT
+    Whether to automatically enable new controls when they are added to a
+    subscribed standard.
+    EOT
   type        = bool
   default     = true
 }
 
 variable "products" {
-  description = "AWS Security Hub product integrations to subscribe to. Each value should be the product path (e.g., 'aws/guardduty')."
+  description = <<-EOT
+    AWS Security Hub product integrations to subscribe to. Each value should be
+    the product path (e.g., 'aws/guardduty').
+    EOT
   type        = list(string)
   default = [
     "aws/guardduty",
@@ -15,7 +21,11 @@ variable "products" {
 }
 
 variable "standards" {
-  description = "Security Hub standards to subscribe to. Each value should be the standard path without the 'standards/' prefix (e.g., 'aws-foundational-security-best-practices/v/1.0.0')."
+  description = <<-EOT
+    Security Hub standards to subscribe to. Each value should be the standard
+    path without the 'standards/' prefix (e.g.,
+    'aws-foundational-security-best-practices/v/1.0.0').
+    EOT
   type        = list(string)
   default = [
     "aws-foundational-security-best-practices/v/1.0.0",

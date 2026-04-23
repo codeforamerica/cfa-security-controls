@@ -1,53 +1,74 @@
 variable "enable_ec2_agent_management" {
-  description = "Whether to automatically manage the GuardDuty security agent on EC2 instances (requires runtime monitoring)."
+  description = <<-EOT
+    Whether to automatically manage the GuardDuty security agent on EC2
+    instances (requires runtime monitoring).
+    EOT
   type        = bool
   default     = true
 }
 
 variable "enable_eks_addon_management" {
-  description = "Whether to automatically manage the GuardDuty security agent add-on for EKS clusters (requires runtime monitoring)."
+  description = <<-EOT
+    Whether to automatically manage the GuardDuty security agent add-on for EKS
+    clusters (requires runtime monitoring).
+    EOT
   type        = bool
   default     = true
 }
 
 variable "enable_eks_audit_logs" {
-  description = "Whether to enable Kubernetes audit log monitoring."
+  description = <<-EOT
+    Whether to enable Kubernetes audit log monitoring.
+    EOT
   type        = bool
   default     = true
 }
 
 variable "enable_lambda_protection" {
-  description = "Whether to enable Lambda network activity monitoring."
+  description = <<-EOT
+    Whether to enable Lambda network activity monitoring.
+    EOT
   type        = bool
   default     = true
 }
 
 variable "enable_malware_protection" {
-  description = "Whether to enable malware protection scanning for EC2 EBS volumes."
+  description = <<-EOT
+    Whether to enable malware protection scanning for EC2 EBS volumes.
+    EOT
   type        = bool
   default     = true
 }
 
 variable "enable_rds_protection" {
-  description = "Whether to enable RDS login activity monitoring."
+  description = <<-EOT
+    Whether to enable RDS login activity monitoring.
+    EOT
   type        = bool
   default     = true
 }
 
 variable "enable_runtime_monitoring" {
-  description = "Whether to enable runtime monitoring for EKS and EC2."
+  description = <<-EOT
+    Whether to enable runtime monitoring for EKS and EC2.
+    EOT
   type        = bool
   default     = true
 }
 
 variable "enable_s3_logs" {
-  description = "Whether to enable S3 data event monitoring."
+  description = <<-EOT
+    Whether to enable S3 data event monitoring.
+    EOT
   type        = bool
   default     = true
 }
 
 variable "finding_publishing_frequency" {
-  description = "Frequency of notifications for non-archived findings. Valid values: FIFTEEN_MINUTES, ONE_HOUR, SIX_HOURS."
+  description = <<-EOT
+    Frequency of notifications for non-archived findings. Valid values:
+    FIFTEEN_MINUTES, ONE_HOUR, SIX_HOURS.
+    EOT
   type        = string
   default     = "FIFTEEN_MINUTES"
 

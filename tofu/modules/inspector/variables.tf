@@ -1,5 +1,8 @@
 variable "resource_types" {
-  description = "Resource types to enable Amazon Inspector scanning for. Valid values: EC2, ECR, LAMBDA, LAMBDA_CODE."
+  description = <<-EOT
+    Resource types to enable Amazon Inspector scanning for. Valid values: EC2,
+    ECR, LAMBDA, LAMBDA_CODE.
+    EOT
   type        = list(string)
   default     = ["EC2", "ECR", "LAMBDA", "LAMBDA_CODE"]
 
